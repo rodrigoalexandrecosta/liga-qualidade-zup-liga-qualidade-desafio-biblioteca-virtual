@@ -9,6 +9,7 @@ import br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique.exceptions.UserN
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosExemplar;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosUsuario;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.TipoExemplar;
+import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.TipoUsuario;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -33,10 +34,10 @@ public class EmprestimoHandler {
                 DadosUsuario usuario = findUser(usuarios, emprestimo.idUsuario);
                 DadosExemplar exemplar = findExemplar(exemplares, emprestimo.idLivro, emprestimo.tipoExemplar);
 
-                EmprestimoValidator emprestimoValidator = new EmprestimoValidator(emprestimo, usuario);
+                EmprestimoValidator emprestimoValidator = new EmprestimoValidator(emprestimo, usuario, exemplares);
                 emprestimoValidator.validate();
 
-                LocalDate dataPrevistaDevolucao = calculateDataPrevistaDevolucao(emprestimo);
+                LocalDate dataPrevistaDevolucao = calculateDataPrevistaDevolucao(usuario.padrao, emprestimo.tempo);
 
                 emprestimosConcedidos.add(new EmprestimoConcedido(usuario.idUsuario, exemplar.idExemplar, dataPrevistaDevolucao));
             } catch (EmprestimoValidationException e) {
@@ -67,8 +68,10 @@ public class EmprestimoHandler {
         throw new ExemplarNotFoundException("Exemplar not found");
     }
 
-    private LocalDate calculateDataPrevistaDevolucao(DadosEmprestimo emprestimo) {
-        LocalDate hoje = LocalDate.now();
-        return hoje.plusDays(emprestimo.tempo);
+    private LocalDate calculateDataPrevistaDevolucao(TipoUsuario tipoUsuario, int tempo) {
+        if(tipoUsuario.equals(TipoUsuario.PADRAO)) {
+            return LocalDate.now().plusDays(tempo);
+        }
+        return LocalDate.now().plusDays(60);
     }
 }
