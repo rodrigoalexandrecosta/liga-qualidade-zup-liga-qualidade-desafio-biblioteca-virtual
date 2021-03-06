@@ -2,6 +2,10 @@ package br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique;
 
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.DadosEmprestimo;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.EmprestimoConcedido;
+import br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique.exceptions.EmprestimoBusinessException;
+import br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique.exceptions.EmprestimoValidationException;
+import br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique.exceptions.ExemplarNotFoundException;
+import br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique.exceptions.UserNotFoundException;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosExemplar;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosUsuario;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.TipoExemplar;
@@ -32,11 +36,12 @@ public class EmprestimoHandler {
                 EmprestimoValidator emprestimoValidator = new EmprestimoValidator(emprestimo, usuario);
                 emprestimoValidator.validate();
 
-                LocalDate hoje = LocalDate.now();
-                LocalDate dataPrevistaDevolucao = hoje.plusDays(emprestimo.tempo);
+                LocalDate dataPrevistaDevolucao = calculateDataPrevistaDevolucao(emprestimo);
 
                 emprestimosConcedidos.add(new EmprestimoConcedido(usuario.idUsuario, exemplar.idExemplar, dataPrevistaDevolucao));
-            } catch (Exception e) {
+            } catch (EmprestimoValidationException e) {
+                System.out.println(e.getMessage());
+            } catch (EmprestimoBusinessException e) {
                 System.out.println(e.getMessage());
             }
         });
@@ -44,21 +49,26 @@ public class EmprestimoHandler {
         return emprestimosConcedidos;
     }
 
-    private DadosUsuario findUser(Set<DadosUsuario> usuarios, Integer idUsuario) throws Exception {
+    private DadosUsuario findUser(Set<DadosUsuario> usuarios, Integer idUsuario) throws UserNotFoundException {
         for(DadosUsuario usuario: usuarios) {
-            if(usuario.idUsuario == idUsuario) {
+            if(idUsuario.equals(usuario.idUsuario)) {
                 return usuario;
             }
         }
-        throw new Exception("User not found");
+        throw new UserNotFoundException("User not found");
     }
 
-    private DadosExemplar findExemplar(Set<DadosExemplar> exemplares, Integer idLivro, TipoExemplar tipoExemplar) throws Exception {
+    private DadosExemplar findExemplar(Set<DadosExemplar> exemplares, Integer idLivro, TipoExemplar tipoExemplar) throws ExemplarNotFoundException {
         for(DadosExemplar exemplar: exemplares) {
-            if(exemplar.idLivro == idLivro && exemplar.tipo == tipoExemplar) {
+            if(idLivro.equals(exemplar.idLivro) && tipoExemplar.equals(exemplar.tipo)) {
                 return exemplar;
             }
         }
-        throw new Exception("Exemplar not found");
+        throw new ExemplarNotFoundException("Exemplar not found");
+    }
+
+    private LocalDate calculateDataPrevistaDevolucao(DadosEmprestimo emprestimo) {
+        LocalDate hoje = LocalDate.now();
+        return hoje.plusDays(emprestimo.tempo);
     }
 }
