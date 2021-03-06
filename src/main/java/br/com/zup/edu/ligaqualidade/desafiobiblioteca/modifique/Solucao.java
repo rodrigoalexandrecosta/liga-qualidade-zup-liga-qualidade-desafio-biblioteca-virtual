@@ -1,14 +1,13 @@
 package br.com.zup.edu.ligaqualidade.desafiobiblioteca.modifique;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.DadosDevolucao;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.DadosEmprestimo;
 import br.com.zup.edu.ligaqualidade.desafiobiblioteca.EmprestimoConcedido;
-import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosExemplar;
-import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosLivro;
-import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.DadosUsuario;
+import br.com.zup.edu.ligaqualidade.desafiobiblioteca.pronto.*;
 
 public class Solucao {
 
@@ -36,7 +35,7 @@ public class Solucao {
 			Set<DadosUsuario> usuarios, Set<DadosEmprestimo> emprestimos,
 			Set<DadosDevolucao> devolucoes, LocalDate dataParaSerConsideradaNaExpiracao) {
 		
-		return Set.of();
+		EmprestimoHandler emprestimoHandler = new EmprestimoHandler(usuarios, emprestimos, exemplares);
+		return emprestimoHandler.concedeEmprestimos();
 	}
-
 }
